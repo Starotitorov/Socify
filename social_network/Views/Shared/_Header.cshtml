@@ -1,0 +1,79 @@
+﻿@using Microsoft.AspNet.Identity
+<div class="w3-top">
+    <ul class="w3-navbar w3-theme-d2 w3-left-align w3-large">
+        <li class="w3-hide-medium w3-hide-large w3-opennav w3-right">
+            <a class="w3-padding-large w3-hover-white w3-large w3-theme-d2" href="javascript:void(0);" onclick="openNav()"><i class="fa fa-bars"></i></a>
+        </li>
+        <li><a href="@Url.Action("Index", "Home")" class="w3-padding-large w3-theme-d4"><i class="fa fa-home w3-margin-right"></i>Socify</a></li>
+        @if (Request.IsAuthenticated)
+        {
+            <li class="w3-hide-small"><a href="@Url.RouteUrl("DisplayPosts")" class="w3-padding-large w3-hover-white" title="News"><i class="fa fa-globe"></i></a></li>
+            <li class="w3-hide-small"><a href="@Url.RouteUrl("DisplayUsers")" class="w3-padding-large w3-hover-white" title="People"><i class="fa fa-users"></i></a></li>
+        }
+        @if (Request.IsAuthenticated)
+        {
+            <li class="w3-hide-small w3-right"><a href="@Url.RouteUrl("DisplayUser", new { id=User.Identity.GetUserId() })" class="w3-padding-large w3-hover-white" title="My Account"><img src="@Url.Action("Show", "Avatars", new { userId=User.Identity.GetUserId() })" class="w3-circle" style="height:25px;width:25px" alt="Avatar"></a></li>
+            using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "w3-hide-small w3-right" }))
+            {
+                @Html.AntiForgeryToken()
+                <li class="w3-hide-small w3-right"><a class="w3-padding-large w3-hover-white" href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+                <li class="w3-hide-small w3-right">
+                    @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "w3-padding-large w3-hover-white" })
+                </li>
+            }
+        }
+        else
+        {
+            <li class="w3-hide-small w3-right">@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "w3-padding-large w3-hover-whitet" })</li>
+            <li class="w3-hide-small w3-right">@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class="w3-padding-large w3-hover-whitet" })</li>
+        }
+    </ul>
+</div>
+<div id="navDemo" class="w3-hide w3-hide-large w3-hide-medium w3-top" style="margin-top:51px">
+    <ul class="w3-navbar w3-left-align w3-large w3-theme">
+        @if (Request.IsAuthenticated)
+        {
+            <li><a href="@Url.RouteUrl("DisplayPosts")" class="w3-padding-large">News</a></li>
+            <li><a href="@Url.RouteUrl("DisplayUsers")" class="w3-padding-large">Users</a></li>
+            <li><a class="w3-padding-large" href="@Url.RouteUrl("DisplayUser", new { id=User.Identity.GetUserId() })">My Profile</a></li>
+            using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <li><a class="w3-padding-large" href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+            }
+        }
+        else
+        {
+            <li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "w3-padding-large" })</li>
+            <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "w3-padding-large" })</li>
+        }
+    </ul>
+</div>
+<script>
+    // Accordion
+    function myFunction(id) {
+            var x = document.getElementById(id);
+            if (x.className.indexOf("w3-show") == -1)
+            {
+                x.className += " w3-show";
+                x.previousElementSibling.className += " w3-theme-d1";
+            }
+            else {
+                x.className = x.className.replace("w3-show", "");
+                x.previousElementSibling.className =
+                x.previousElementSibling.className.replace(" w3-theme-d1", "");
+            }
+        }
+
+        // Used to toggle the menu on smaller screens when clicking on the menu button
+        function openNav() {
+            var x = document.getElementById("navDemo");
+            if (x.className.indexOf("w3-show") == -1)
+            {
+                x.className += " w3-show";
+            }
+            else {
+                x.className = x.className.replace(" w3-show", "");
+            }
+        }
+</script>

@@ -1,0 +1,16 @@
+﻿@model IEnumerable<social_network.Models.ApplicationUser>
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="col-sm-4 col-sm-push-8">
+    <div class="w3-container w3-card-2 w3-round w3-white w3-center w3-margin">
+        <div class="w3-container">
+            @Html.Partial("_SearchForm")
+        </div>
+    </div>
+</div>
+
+<div id="results" class="col-sm-8 col-sm-pull-4">
+    @Html.Partial("Search", Model)
+</div>

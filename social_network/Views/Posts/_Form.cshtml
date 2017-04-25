@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNet.Identity
+
+@using (Ajax.BeginForm("Create", "Posts", null, null, new { enctype = "multipart/form-data", id = "PostForm", @class = "form form-horizontal" }))
+{
+    <h6 class="w3-opacity">Social Media template by w3.css</h6>
+    <div class="form-group">
+        <label class="col-xs-12" for="Photo">Photo</label>
+        <div class="editor-field col-xs-12">
+            <input type="file" name="Photo" id="Photo" accept="image/*" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-xs-12">
+            <textarea id="Body" name="Body" class="w3-border w3-padding" style="min-width: 100%" rows="3"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-xs-12">
+            <button id="UploadPhoto" type="button" class="w3-btn w3-theme">
+                <i class="fa fa-pencil"></i>Post
+            </button>
+        </div>
+    </div>
+}
+
+@Html.Partial("../Posts/_PostTemplate")

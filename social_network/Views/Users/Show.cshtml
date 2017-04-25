@@ -1,0 +1,173 @@
+﻿@using Microsoft.AspNet.Identity
+@model social_network.Models.UserViewModel
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="w3-row">
+    <!-- Left Column -->
+    <div class="w3-col m3">
+        <!-- Profile -->
+        <div class="w3-row-padding">
+            <div class="w3-col m12">
+                <div class="w3-card-2 w3-round w3-white">
+                    <div class="w3-container w3-margin">
+                        <h4 class="w3-center">Profile</h4>
+                        <p class="w3-center"><img src="@Url.Action("Show", "Avatars", new { userId=Model.Id })" class="w3-circle" style="height:106px;width:106px" alt="Avatar"></p>
+                        <hr>
+                        <p><i class="fa fa-pencil fa-fw w3-margin-right w3-text-theme"></i>@Model.FullName</p>
+                        @if (Model.HomeTown != null)
+                        {
+                            <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i>@Model.HomeTown</p>
+                        }
+                        @if (Model.BirthDate != null)
+                        {
+                            <p><i class="fa fa-birthday-cake fa-fw w3-margin-right w3-text-theme"></i>@Convert.ToDateTime(Model.BirthDate).ToShortDateString()</p>
+                        }
+                    </div>
+                </div>
+                <br>
+
+                @if (User.Identity.GetUserId() == Model.Id)
+                {
+                    <div class="w3-card-2 w3-round">
+                        <div class="w3-accordion w3-white">
+                            <a href="@Url.Action("Edit", "Account")" class="w3-btn-block w3-theme-l1 w3-left-align"><i class="fa fa-user fa-fw w3-margin-right"></i>Edit profile</a>
+                        </div>
+                    </div>
+                }
+                <br>
+            </div>
+        </div>
+        <!-- End Left Column -->
+    </div>
+
+    <!-- Middle Column -->
+    <div class="w3-col m9">
+
+        @if (Model.Id == User.Identity.GetUserId())
+        {
+            <div class="w3-row-padding">
+                <div class="w3-col m12">
+                    <div class="w3-card-2 w3-round w3-white">
+                        <div class="w3-container w3-padding w3-margin-top w3-margin-bottom">
+                            @Html.Partial("../Posts/_Form")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div id="posts-user@(Model.Id)">
+            @if (Model.PostModels.Count() != 0)
+            {
+                foreach (var postModel in Model.PostModels)
+                {
+                    <div data-id="@postModel.Id" data-was-liked-by-current-user="@postModel.Likes.Where(l => l.VoterId == User.Identity.GetUserId()).Count().Equals(1)" class="w3-container w3-card-2 w3-white w3-round w3-margin post" id="post@(postModel.Id)">
+                        <br>
+                        @if (postModel.SenderId == User.Identity.GetUserId())
+                        {
+                            <button type="button" class="pull-right btn-link delete-post">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        }
+                        <img src="@Url.Action("Show", "Avatars", new { userId=postModel.SenderId })" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px"><br>
+                        <span class="w3-right w3-opacity">@postModel.PublicationTime</span>
+                        <h4>@postModel.SenderFullName</h4><br>
+                        <hr class="w3-clear">
+                        <img class="img-responsive img-center" src="@Url.Action("Show", "Photos", new { postId=postModel.Id})" /><br>
+                        <p>@postModel.Body</p>
+                        <button type="button" class="w3-btn w3-theme-d1 w3-margin-bottom like-post"><i class="fa fa-thumbs-up"></i> @postModel.Likes.Count() Likes</button>
+                    </div>
+                }
+            }
+            else
+            {
+                <h1 id="no-posts" class="text-center">No posts :(</h1>
+            }
+        </div>
+
+        <!-- End Middle Column -->
+    </div>
+
+    <!-- End Grid -->
+</div>
+@Html.Partial("../Posts/_PostTemplate")
+<script type="text/javascript">
+    String.prototype.capitalize = function () {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    }
+    $(function () {
+        var source = $("#post-template").html();
+        var template = Handlebars.compile(source);
+        $("#UploadPhoto").on("click", function (event) {
+            event.preventDefault();
+            var data = new FormData();
+
+            var files = $("#PostForm #Photo").get(0).files;
+
+            if (files.length > 0) {
+                data.append("Photo", files[0]);
+            }
+
+            data.append("Body", $("#PostForm").find("#Body").val());
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Create", "Posts")",
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (data) {
+                    $("#PostForm").find("textarea").val('');
+                    $("#PostForm").find("input[type=file]").val('');
+                    var html = template({ post: data, currentUserId: "@User.Identity.GetUserId()" });
+                    $("#posts-user" + data.SenderId).find("#no-posts").remove();
+                    $("#posts-user" + data.SenderId).prepend(html);
+                }
+            });
+        });
+        $(document).on("click", ".delete-post", function () {
+            var element = $(this);
+            $.ajax({
+                type: "DELETE",
+                url: "@Url.Action("Destroy", "Posts")",
+                data: {
+                    "postId": $(this).closest(".post").data("id"),
+                },
+                success: function (data) {
+                    $("#posts-user@(Model.Id)").find("#post" + $(element).closest(".post").data("id")).remove();
+                    if (!$(".post").length && !$("#no-posts").length) {
+                        $("#posts-user@(Model.Id)").append("<h1 id='no-posts' class='text-center'>No posts :(</h1>");
+                    }
+                }
+            });
+        });
+        $(document).on("click", ".like-post", function () {
+            var wasLikedByCurrentUser = $(this).closest(".post").data("wasLikedByCurrentUser") == "True",
+                method,
+                url;
+            if (wasLikedByCurrentUser) {
+                method = "DELETE";
+                url = "@Url.Action("Destroy", "Likes")";
+            }
+            else {
+                method = "POST";
+                url = "@Url.Action("Create", "Likes")";
+            }
+            var element = $(this);
+            $.ajax({
+                type: method,
+                url: url,
+                data: {
+                    "postId": $(element).closest(".post").data("id"),
+                },
+                success: function (data) {
+                    $(element).html("<i class='fa fa-thumbs-up'></i> "+data+" Likes");
+                    wasLikedByCurrentUser = !wasLikedByCurrentUser;
+                    $(element).closest(".post").data("wasLikedByCurrentUser", wasLikedByCurrentUser.toString().capitalize());
+                }
+            });
+        });
+    });
+</script>

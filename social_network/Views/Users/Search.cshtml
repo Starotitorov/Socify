@@ -1,0 +1,19 @@
+﻿@model IEnumerable<social_network.Models.ApplicationUser>
+
+@if (Model.Count() == 0)
+{
+    <h1 class="text-center">Sorry, nothing was found :(</h1>
+}
+else
+{
+    <div class="w3-margin list-group user-search-result">
+        @foreach (var user in Model)
+        {
+            <div class="list-group-item user-search-result__item">
+                <img src="@Url.Action("Show", "Avatars", new { userId=user.Id })" alt="Avatar" class="user-search-result__item-avatar w3-circle w3-margin-right" style="width:60px">
+                <a href="@Url.RouteUrl("DisplayUser", new { id=user.Id })"><h4>@user.FullName</h4></a>
+            </div>
+        }
+    </div>
+}
+

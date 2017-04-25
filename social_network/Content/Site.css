@@ -1,0 +1,29 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.img-center {
+    margin: 0 auto;
+}
+
+.btn-clear {
+    opacity: 0;
+}
+
+.user-search-result__item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.user-search-result__item-avatar {
+    width: 60px;
+    height: 60px;
+}

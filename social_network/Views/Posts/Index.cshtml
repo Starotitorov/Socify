@@ -1,0 +1,108 @@
+﻿@using Microsoft.AspNet.Identity
+@model IEnumerable<social_network.Models.PostViewModel>
+
+<div class="w3-row">
+    <div class="w3-col m12">
+        <div id="posts">
+            @if (Model.Count() != 0)
+            {
+                foreach (var postModel in Model)
+                {
+                    <div data-id="@postModel.Id" data-was-liked-by-current-user="@postModel.Likes.Where(l => l.VoterId == User.Identity.GetUserId()).Count().Equals(1)" class="w3-container w3-card-2 w3-white w3-round w3-margin post" id="post@(postModel.Id)">
+                        <br>
+                        <img src="@Url.Action("Show", "Avatars", new { userId=postModel.SenderId })" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px"><br>
+                        <span class="w3-right w3-opacity">@postModel.PublicationTime</span>
+                        <h4>@postModel.SenderFullName</h4><br>
+                        <hr class="w3-clear">
+                        <img class="img-responsive img-center" src="@Url.Action("Show", "Photos", new { postId=postModel.Id})" /><br>
+                        <p>@postModel.Body</p>
+                        <button type="button" class="w3-btn w3-theme-d1 w3-margin-bottom like-post"><i class="fa fa-thumbs-up"></i> @postModel.Likes.Count() Likes</button>
+                    </div>
+                }
+            }
+            else
+            {
+                <h1 id="no-posts" class="text-center">No posts :(</h1>
+            }
+        </div>
+        @if (ViewBag.lastId != -1)
+            {
+            <div class="text-center">
+                @Html.ActionLink("More", "More", "Posts", new { lastId = ViewBag.lastId }, new { id = "more-posts", @class = "btn btn-default btn-clear", data_last_id = ViewBag.lastId })
+            </div>
+        }
+    </div>
+</div>
+
+
+@Html.Partial("_PostTemplate")
+<script type="text/javascript">
+    String.prototype.capitalize = function () {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    }
+    $(function () {
+        var source = $("#post-template").html();
+        var template = Handlebars.compile(source);
+        $(document).on("click", ".like-post", function () {
+            var wasLikedByCurrentUser = $(this).parent().data("wasLikedByCurrentUser") == "True",
+                method,
+                url;
+            if (wasLikedByCurrentUser) {
+                method = "DELETE";
+                url = "@Url.Action("Destroy", "Likes")";
+            }
+            else {
+                method = "POST";
+                url = "@Url.Action("Create", "Likes")";
+            }
+            var element = $(this);
+            $.ajax({
+                type: method,
+                url: url,
+                data: {
+                    "postId": $(element).parent().data("id"),
+                },
+                success: function (data) {
+                    $(element).html("<i class='fa fa-thumbs-up'></i> "+data+" Likes");
+                    wasLikedByCurrentUser = !wasLikedByCurrentUser;
+                    $(element).parent().data("wasLikedByCurrentUser", wasLikedByCurrentUser.toString().capitalize());
+                }
+            });
+        });
+        $(window).scroll(function () {
+            var inUsage = false;
+            if (!$("#more-posts").length || $("#more-posts").data("lastId") == -1) {
+                return;
+            }
+            if ($(window).scrollTop() + $(window).height() >= $("#more-posts").offset().top && !inUsage) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("More", "Posts")",
+                    data: {
+                        "lastId": $("#more-posts").data("lastId"),
+                    },
+                    cache: false,
+                    async: false,
+                    beforeSend: function() {
+                        inUsage = true;
+                    },
+                    success: function (data) {
+                        if (data.posts.length > 0) {
+                            for (var i = 0; i < data.posts.length; ++i) {
+                                if (!$("#post" + data.posts[i].Id).length) {
+                                    html = template({ post: data.posts[i] });
+                                    $("#posts").append(html);
+                                }
+                            }
+                            $("#more-posts").data("lastId", data.lastId);
+                            if (data.lastId == -1) {
+                                $("#more-posts").hide();
+                            }
+                        }
+                        inUsage = false;
+                    }
+                });
+            }
+        })
+    });
+</script>

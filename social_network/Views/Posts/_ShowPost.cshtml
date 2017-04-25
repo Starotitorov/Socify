@@ -1,0 +1,19 @@
+﻿@using Microsoft.AspNet.Identity
+@model social_network.Models.PostViewModel
+
+<div data-id="@Model.Id" data-was-liked-by-current-user="@Model.Likes.Where(l => l.VoterId == User.Identity.GetUserId()).Count().Equals(1)" class="w3-container w3-card-2 w3-white w3-round w3-margin post" id="post@(Model.Id)">
+    <br>
+    @if (Model.SenderId == User.Identity.GetUserId())
+    {
+        <button type="button" class="pull-right btn-link delete-post">
+            <i class="fa fa-times"></i>
+        </button>
+    }
+    <img src="@Url.Action("Show", "Avatars", new { userId=Model.SenderId })" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px"><br>
+    <span class="w3-right w3-opacity">@Model.PublicationTime</span>
+    <h4>@Model.SenderFullName</h4><br>
+    <hr class="w3-clear">
+    <img class="img-responsive img-center" src="@Url.Action("Show", "Photos", new { postId=Model.Id})" /><br>
+    <p>@Model.Body</p>
+    <button type="button" class="w3-btn w3-theme-d1 w3-margin-bottom like-post"><i class="fa fa-thumbs-up"></i> @Model.Likes.Count() Likes</button>
+</div>

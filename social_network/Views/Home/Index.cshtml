@@ -1,0 +1,11 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1 class="text-center">Socify</h1>
+    <p class="lead text-center">Welcome to Socify! It is the best service for sharing news with friends.</p>
+    <div class="text-center">
+        @Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "btn btn-lg btn-primary" })
+    </div>
+</div>

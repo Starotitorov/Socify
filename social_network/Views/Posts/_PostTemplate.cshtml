@@ -1,0 +1,25 @@
+﻿<script>
+    Handlebars.registerHelper('if_eq', function (a, b, opts) {
+        if (a == b)
+            return opts.fn(this);
+        else
+            return opts.inverse(this);
+    });
+</script>
+<script id="post-template" type="text/x-handlebars-template">
+    <div data-id="{{ post.Id }}" data-was-liked-by-current-user="False" class="w3-container w3-card-2 w3-white w3-round w3-margin post" id="post{{ post.Id }}">
+        <br>
+        {{#if_eq post.SenderId currentUserId }}
+            <button type="button" class="pull-right btn-link delete-post">
+                <i class="fa fa-times"></i>
+            </button>
+        {{/if_eq}}
+        <img src="/Avatars/Show?userId={{ post.SenderId }}" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px"><br>
+        <span class="w3-right w3-opacity">{{ post.PublicationTime }}</span>
+        <h4>{{ post.SenderFullName }}</h4><br>
+        <hr class="w3-clear">
+        <div class="text-center"><img class="img-responsive img-center" src="/Photos/Show?postId={{ post.Id }}" /></div>
+        <p>{{ post.Body }}</p>
+        <button type="button" class="w3-btn w3-theme-d1 w3-margin-bottom like-post"><i class="fa fa-thumbs-up"></i> {{ post.Likes.length }} Likes</button>
+    </div>
+</script>
